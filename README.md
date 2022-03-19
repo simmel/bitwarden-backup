@@ -14,3 +14,6 @@ $ bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
   scp bitwarden_export.json.asc backup-server.example.com:/backup && \
   curl -sSf https://some-service/my-uuid/completed
 ```
+
+then save the unencrypted JSON backup (.json) of your Vault into the file
+`~/Downloads/bitwarden_export.json`.
