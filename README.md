@@ -10,7 +10,8 @@ Bitwarden Web Vault via your webbrowser or via the Bitwarden Desktop application
 
 ```shell
 $ bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
-  gpg -eac --output bitwarden_export.json.asc && \
+  gpg -eac --passphrase-fd 3 -o bitwarden_export.json.asc \
+    3< <(pass bitwarden/backup) && \
   scp bitwarden_export.json.asc backup-server.example.com:/backup && \
   curl -sSf https://some-service/my-uuid/completed
 ```
