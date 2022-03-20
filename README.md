@@ -18,3 +18,17 @@ $ bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
 
 then save the unencrypted JSON backup (.json) of your Vault into the file
 `~/Downloads/bitwarden_export.json`.
+
+## Securer?
+
+Nothing is secure.
+
+But we can at least try our best:
+* Use named pipe so the unencrypted passwords never hit disk and only touch
+  memory.
+* If we need to hit disk overwrite the file (yeah, we know it probably won't
+  help with SSD/NVMEs)
+* Overwrite memory used after we're done with it
+* Use a safe(r) programming language (Rust Evangelism Strikeforce assemble!)
+* We know gpg-agent stores the passwords in memory for a while but that's not
+  our problem ; P
