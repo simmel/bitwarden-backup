@@ -1,0 +1,11 @@
+[package]
+name = "bitwarden-backup"
+version = "0.1.0"
+description = "Securer and composable Bitwarden backup"
+authors = ["Simon Lundström <simmel@soy.se>"]
+homepage = "https://github.com/simmel/bitwarden-backup"
+repository = "https://github.com/simmel/bitwarden-backup"
+license = "ISC"
+edition = "2021"
+
+[dependencies]
