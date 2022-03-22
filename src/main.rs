@@ -10,6 +10,10 @@ struct BitwardenBackup {
     /// control the verbosity of logging. One = info, two = debug
     #[argh(switch, short = 'v')]
     verbose: i32,
+
+    /// file or directory where you save the unencrypted Bitwarden backup
+    #[argh(option, short = 'p')]
+    path: String,
 }
 
 fn main() {
@@ -27,5 +31,5 @@ fn main() {
         .filter(None, loglevel)
         .init();
 
-    info!("Hello, world!");
+    info!("Path: {:?}", args.path);
 }
