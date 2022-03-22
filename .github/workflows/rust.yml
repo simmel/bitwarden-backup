@@ -41,7 +41,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         name: Test
         with:
-          command: test --verbose
+          command: test
           args: --verbose
 
       - uses: actions-rs/cargo@v1
