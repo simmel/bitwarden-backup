@@ -54,4 +54,3 @@ jobs:
         name: Lint
         with:
           command: clippy
-          args: -- --deny warnings

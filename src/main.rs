@@ -1,6 +1,7 @@
 use argh::FromArgs;
 use log::{info, LevelFilter};
 
+#[deny(warnings)]
 #[derive(FromArgs, Debug)]
 #[argh(
     description = "Bitwarden backup",
