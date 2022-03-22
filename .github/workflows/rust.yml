@@ -54,3 +54,30 @@ jobs:
         name: Lint
         with:
           command: clippy
+
+  integration-test:
+
+    runs-on: ${{ matrix.os }}
+    needs: build
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        name: Install toolchain
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - uses: actions-rs/cargo@v1
+        name: Test
+        with:
+          command: test
+          args: --verbose
