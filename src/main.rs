@@ -15,6 +15,10 @@ struct BitwardenBackup {
     /// file or directory where you save the unencrypted Bitwarden backup
     #[argh(option, short = 'p')]
     path: String,
+
+    /// whether or not to use file system watching on path
+    #[argh(switch)]
+    fswatch: bool,
 }
 
 fn main() {
@@ -33,4 +37,5 @@ fn main() {
         .init();
 
     info!("Path: {:?}", args.path);
+    info!("fswatch: {:?}", args.fswatch);
 }
