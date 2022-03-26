@@ -53,6 +53,24 @@ fn validate_backup(backup_json: &String) -> bool {
     return valid;
 }
 
+#[test]
+fn test_bare_minimum() {
+    let json = String::from(
+        r#"
+{
+  "folders": [
+   {}
+  ],
+  "items": [
+   {}
+  ]
+}
+"#,
+    );
+    let valid = validate_backup(&json);
+    assert!(valid);
+}
+
 fn main() {
     let args: BitwardenBackup = argh::from_env();
     let mut loglevel: LevelFilter = LevelFilter::Error;
