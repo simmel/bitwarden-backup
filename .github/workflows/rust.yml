@@ -63,7 +63,9 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - windows-latest
+          # Windows won't be fixed util https://github.com/Eolu/ipipe/issues/13
+          # or #1 is fixed.
+          # - windows-latest
           - macos-latest
 
     steps:
