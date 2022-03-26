@@ -1,5 +1,8 @@
 use argh::FromArgs;
 use log::{info, LevelFilter};
+use nix::sys::stat;
+use std::fs;
+use std::path::Path;
 
 #[deny(warnings)]
 #[derive(FromArgs, Debug)]
@@ -38,4 +41,9 @@ fn main() {
 
     info!("Path: {:?}", args.path);
     info!("fswatch: {:?}", args.fswatch);
+
+    nix::unistd::mkfifo(Path::new(&args.path), stat::Mode::S_IRWXU).unwrap();
+    let bitwarden_backup = fs::read_to_string(&args.path).unwrap();
+    print!("{}", bitwarden_backup);
+    fs::remove_file(args.path).unwrap();
 }
