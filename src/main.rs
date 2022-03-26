@@ -71,6 +71,18 @@ fn test_bare_minimum() {
     assert!(valid);
 }
 
+#[test]
+fn test_bitwarden_example() {
+    let json = fs::read_to_string(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/bitwarden_export.json"
+    ))
+    .unwrap();
+
+    let valid = validate_backup(&json);
+    assert!(valid);
+}
+
 fn main() {
     let args: BitwardenBackup = argh::from_env();
     let mut loglevel: LevelFilter = LevelFilter::Error;
