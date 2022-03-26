@@ -87,3 +87,13 @@ jobs:
         with:
           command: test
           args: --verbose
+
+      - uses: actions-rs/cargo@v1
+        name: Integration test
+        with:
+          command: build
+          args: --release
+
+      - name: Integration test
+        run: |
+          target/release/bitwarden-backup -v -v --path /tmp/gurken& sleep 0.5 && cat tests/bitwarden_export.json > /tmp/gurken
