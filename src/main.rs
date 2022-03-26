@@ -1,8 +1,11 @@
+extern crate serde_json;
+extern crate valico;
 use argh::FromArgs;
-use log::{info, LevelFilter};
+use log::{debug, info, LevelFilter};
 use nix::sys::stat;
 use std::fs;
 use std::path::Path;
+use valico::json_schema;
 
 #[deny(warnings)]
 #[derive(FromArgs, Debug)]
@@ -24,6 +27,32 @@ struct BitwardenBackup {
     fswatch: bool,
 }
 
+// FIXME: Return a Result instead and use map_err to add to the errors
+fn validate_backup(backup_json: &String) -> bool {
+    let schema = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/resources/bitwarden_export_schema.json"
+    );
+    let json_schema_file = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/src/resources/bitwarden_export_schema.json"
+    ));
+
+    let json_schema = serde_json::from_str(json_schema_file)
+        .expect(&format!("Couldn't parse schema file: {}", &schema));
+
+    let mut scope = json_schema::Scope::new();
+    let json_schema = scope
+        .compile_and_return(json_schema, true)
+        .expect("Couldn't compile schema");
+    let backup_json_parsed =
+        serde_json::from_str(&backup_json).expect("Bitwarden backup is not valid JSON");
+    let valid = json_schema.validate(&backup_json_parsed).is_valid();
+    debug!("Is valid: {:?}", valid);
+
+    return valid;
+}
+
 fn main() {
     let args: BitwardenBackup = argh::from_env();
     let mut loglevel: LevelFilter = LevelFilter::Error;
@@ -42,8 +71,17 @@ fn main() {
     info!("Path: {:?}", args.path);
     info!("fswatch: {:?}", args.fswatch);
 
+    // Ignore if it doesn't exist
+    let _ = fs::remove_file(&args.path);
     nix::unistd::mkfifo(Path::new(&args.path), stat::Mode::S_IRWXU).unwrap();
     let bitwarden_backup = fs::read_to_string(&args.path).unwrap();
-    print!("{}", bitwarden_backup);
-    fs::remove_file(args.path).unwrap();
+
+    if validate_backup(&bitwarden_backup) {
+        info!("Backup is valid!");
+        print!("{}", bitwarden_backup);
+        fs::remove_file(&args.path).unwrap();
+    } else {
+        fs::remove_file(&args.path).unwrap();
+        panic!("Could not validate backup");
+    }
 }

@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "folders": {
+      "type": "array",
+      "minItems": 1
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1
+    }
+  },
+  "required": ["folders", "items"]
+}
