@@ -11,7 +11,7 @@ use valico::json_schema;
 #[derive(FromArgs, Debug)]
 #[argh(
     description = "Bitwarden backup",
-    example = "Set log level to debug.\n$ {command_name} -vv"
+    example = "Set log level to debug.\n$ {command_name} -v -v"
 )]
 struct BitwardenBackup {
     /// control the verbosity of logging. One = info, two = debug
