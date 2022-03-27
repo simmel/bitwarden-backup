@@ -50,7 +50,7 @@ fn validate_backup(backup_json: &str) -> bool {
     let valid = json_schema.validate(&backup_json_parsed).is_valid();
     debug!("Is valid: {:?}", valid);
 
-    return valid;
+    valid
 }
 
 #[test]
