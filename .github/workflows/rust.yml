@@ -97,3 +97,36 @@ jobs:
       - name: Integration test
         run: |
           target/release/bitwarden-backup -v -v --path /tmp/gurken& sleep 0.5 && cat tests/bitwarden_export.json > /tmp/gurken
+
+      - name: Get release-name
+        if: startsWith(github.ref, "refs/tags/")
+        id: release
+        run: |
+          run: (eval $(rustc --print cfg | grep target); echo ::set-output name=name::bitwarden-backup-${GITHUB_REF##*/}-$target_arch-$target_vendor-$target_os-$target_env.zip)
+
+      - name: Prepare release
+        if: startsWith(github.ref, "refs/tags/")
+        run: |
+          zip --junk-paths ${{ steps.release.outputs.name }} target/release/bitwarden-backup
+      - name: Create Release
+        if: startsWith(github.ref, "refs/tags/")
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        if: startsWith(github.ref, "refs/tags/")
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ steps.release.outputs.name }}
+          asset_name: ${{ steps.release.outputs.name }}
+          asset_content_type: application/zip
