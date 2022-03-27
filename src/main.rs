@@ -28,7 +28,7 @@ struct BitwardenBackup {
 }
 
 // FIXME: Return a Result instead and use map_err to add to the errors
-fn validate_backup(backup_json: &String) -> bool {
+fn validate_backup(backup_json: &str) -> bool {
     let schema = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/src/resources/bitwarden_export_schema.json"
