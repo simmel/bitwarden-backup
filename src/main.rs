@@ -39,7 +39,7 @@ fn validate_backup(backup_json: &str) -> bool {
     ));
 
     let json_schema = serde_json::from_str(json_schema_file)
-        .expect(&format!("Couldn't parse schema file: {}", &schema));
+        .unwrap_or_else(|e| panic!("Couldn't parse schema file: {}: {:?}", &schema, e));
 
     let mut scope = json_schema::Scope::new();
     let json_schema = scope
