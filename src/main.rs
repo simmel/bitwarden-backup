@@ -1,3 +1,4 @@
+#![deny(warnings)]
 extern crate serde_json;
 extern crate valico;
 use argh::FromArgs;
@@ -7,7 +8,6 @@ use std::fs;
 use std::path::Path;
 use valico::json_schema;
 
-#[deny(warnings)]
 #[derive(FromArgs, Debug)]
 #[argh(
     description = "Bitwarden backup",
