@@ -63,7 +63,8 @@ jobs:
         shell: bash --noprofile --norc -eo pipefail -i {0}
         run: |
           sudo apt update && sudo apt install gdb &&
-          rust-gdb -batch -x bitwarden-backup.gdb --args target/debug/bitwarden-backup -v -v --path /tmp/gurken target/release/bitwarden-backup -v -v --path /tmp/gurken&
+          gdb --help &&
+          rust-gdb -batch -x bitwarden-backup.gdb --args target/debug/bitwarden-backup -v -v --path /tmp/gurken&
           sleep 0.5 && cat tests/bitwarden_export.json > /tmp/gurken &&
           fg || true && grep -qva my-secret-key bitwarden-backup.core
 
