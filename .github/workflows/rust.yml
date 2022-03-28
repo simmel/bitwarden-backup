@@ -60,6 +60,7 @@ jobs:
           command: clippy
 
       - name: Memory erasure
+        shell: bash --noprofile --norc -eo pipefail -i {0}
         run: |
           sudo apt install gdb &&
           rust-gdb -batch -x bitwarden-backup.gdb --args target/debug/bitwarden-backup -v -v --path /tmp/gurken target/release/bitwarden-backup -v -v --path /tmp/gurken&
