@@ -1,4 +1,4 @@
-break main.rs:125
+break exit
 run
 gcore bitwarden-backup.core
 quit
