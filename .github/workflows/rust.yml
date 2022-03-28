@@ -62,8 +62,8 @@ jobs:
       - name: Memory erasure
         run: |
           sudo apt -qq update && sudo apt -qq install gdb
-          (sleep 3 && date --iso-8601=ns && cat tests/bitwarden_export.json > /tmp/gurken) &
-          (rust-gdb -batch -x bitwarden-backup.gdb --args target/debug/bitwarden-backup -v -v --path /tmp/gurken && date --iso-8601=ns)&
+          (sleep 3 && cat tests/bitwarden_export.json > /tmp/gurken) &
+          rust-gdb -batch -x bitwarden-backup.gdb --args target/debug/bitwarden-backup -v -v --path /tmp/gurken&
           wait && ! grep -qa my-secret-key bitwarden-backup.core
 
   integration-test:
