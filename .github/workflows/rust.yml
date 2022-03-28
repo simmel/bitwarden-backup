@@ -64,7 +64,7 @@ jobs:
           sudo apt update && sudo apt install gdb &&
           (sleep 0.5 && cat tests/bitwarden_export.json > /tmp/gurken) &
           rust-gdb -batch -x bitwarden-backup.gdb --args target/debug/bitwarden-backup -v -v --path /tmp/gurken&
-          wait && grep -qva my-secret-key bitwarden-backup.core
+          wait && ! grep -qa my-secret-key bitwarden-backup.core
 
   integration-test:
 
