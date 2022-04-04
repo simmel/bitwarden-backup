@@ -3,9 +3,12 @@ extern crate serde_json;
 extern crate valico;
 use argh::FromArgs;
 use log::{debug, info, LevelFilter};
+#[allow(unused_imports)]
 #[cfg(unix)]
 use nix::sys::stat;
 use std::fs;
+#[allow(unused_imports)]
+#[cfg(unix)]
 use std::path::Path;
 use valico::json_schema;
 use zeroize::Zeroize;
@@ -57,6 +60,22 @@ fn validate_backup(backup_json: &str) -> bool {
     debug!("Is valid: {:?}", valid);
 
     valid
+}
+
+#[cfg(unix)]
+fn get_backup(path: &str) -> String {
+    // Ignore if it doesn't exist
+    let _ = fs::remove_file(&path);
+    nix::unistd::mkfifo(Path::new(&path), stat::Mode::S_IRWXU).unwrap();
+    fs::read_to_string(&path).unwrap()
+}
+
+#[cfg(windows)]
+fn get_backup(_path: &str) -> String {
+    String::from(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/bitwarden_export.json"
+    )))
 }
 
 #[test]
@@ -114,20 +133,7 @@ fn main() {
     info!("Path: {:?}", path);
     info!("fswatch: {:?}", args.fswatch);
 
-    let mut bitwarden_backup;
-    if cfg!(unix) {
-        // Ignore if it doesn't exist
-        let _ = fs::remove_file(&path);
-        nix::unistd::mkfifo(Path::new(&path), stat::Mode::S_IRWXU).unwrap();
-        bitwarden_backup = fs::read_to_string(&path).unwrap();
-    } else if cfg!(windows) {
-        bitwarden_backup = String::from(include_str!(concat!(
-            env!("CARGO_MANIFEST_DIR"),
-            "/tests/bitwarden_export.json"
-        )));
-    } else {
-        panic!("Unknown platform");
-    };
+    let mut bitwarden_backup = get_backup(&path);
 
     if validate_backup(&bitwarden_backup) {
         info!("Backup is valid!");
