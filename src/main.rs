@@ -19,13 +19,17 @@ struct BitwardenBackup {
     #[argh(switch, short = 'v')]
     verbose: i32,
 
-    /// file or directory where you save the unencrypted Bitwarden backup
+    /// file or directory where you save the unencrypted Bitwarden backup [REQUIRED]
     #[argh(option, short = 'p')]
-    path: String,
+    path: Option<String>,
 
     /// whether or not to use file system watching on path
     #[argh(switch)]
     fswatch: bool,
+
+    /// check version
+    #[argh(switch)]
+    version: bool,
 }
 
 // FIXME: Return a Result instead and use map_err to add to the errors
@@ -86,6 +90,12 @@ fn test_bitwarden_example() {
 
 fn main() {
     let args: BitwardenBackup = argh::from_env();
+
+    if args.version {
+        println!(env!("CARGO_PKG_VERSION"));
+        return;
+    }
+
     let mut loglevel: LevelFilter = LevelFilter::Error;
     if args.verbose == 1 {
         loglevel = LevelFilter::Info;
@@ -99,21 +109,22 @@ fn main() {
         .filter(None, loglevel)
         .init();
 
-    info!("Path: {:?}", args.path);
+    let path = args.path.expect("Required options not provided: --path");
+    info!("Path: {:?}", path);
     info!("fswatch: {:?}", args.fswatch);
 
     // Ignore if it doesn't exist
-    let _ = fs::remove_file(&args.path);
-    nix::unistd::mkfifo(Path::new(&args.path), stat::Mode::S_IRWXU).unwrap();
-    let mut bitwarden_backup = fs::read_to_string(&args.path).unwrap();
+    let _ = fs::remove_file(&path);
+    nix::unistd::mkfifo(Path::new(&path), stat::Mode::S_IRWXU).unwrap();
+    let mut bitwarden_backup = fs::read_to_string(&path).unwrap();
 
     if validate_backup(&bitwarden_backup) {
         info!("Backup is valid!");
         print!("{}", &bitwarden_backup);
         bitwarden_backup.zeroize();
-        fs::remove_file(&args.path).unwrap();
+        fs::remove_file(&path).unwrap();
     } else {
-        fs::remove_file(&args.path).unwrap();
+        fs::remove_file(&path).unwrap();
         panic!("Could not validate backup");
     }
 }
