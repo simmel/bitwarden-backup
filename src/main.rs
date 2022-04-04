@@ -7,6 +7,7 @@ use nix::sys::stat;
 use std::fs;
 use std::path::Path;
 use valico::json_schema;
+use zeroize::Zeroize;
 
 #[derive(FromArgs, Debug)]
 #[argh(
@@ -104,11 +105,12 @@ fn main() {
     // Ignore if it doesn't exist
     let _ = fs::remove_file(&args.path);
     nix::unistd::mkfifo(Path::new(&args.path), stat::Mode::S_IRWXU).unwrap();
-    let bitwarden_backup = fs::read_to_string(&args.path).unwrap();
+    let mut bitwarden_backup = fs::read_to_string(&args.path).unwrap();
 
     if validate_backup(&bitwarden_backup) {
         info!("Backup is valid!");
-        print!("{}", bitwarden_backup);
+        print!("{}", &bitwarden_backup);
+        bitwarden_backup.zeroize();
         fs::remove_file(&args.path).unwrap();
     } else {
         fs::remove_file(&args.path).unwrap();
