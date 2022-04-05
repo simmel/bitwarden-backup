@@ -106,7 +106,7 @@ jobs:
 
       - name: Integration test
         run: |
-          env && target/release/bitwarden-backup -v -v --path $RUNNER_TEMP/gurken& sleep 0.5 && cat tests/bitwarden_export.json > $RUNNER_TEMP/gurken
+          target/release/bitwarden-backup -v -v --path $RUNNER_TEMP/gurken& sleep 0.5 && cat tests/bitwarden_export.json > $RUNNER_TEMP/gurken
 
       - name: Get release-name
         if: startsWith(github.ref, 'refs/tags/')
