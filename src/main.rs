@@ -72,7 +72,10 @@ fn get_backup(path: &str) -> String {
 
 #[cfg(windows)]
 fn get_backup(_path: &str) -> String {
-    String::from("lolwat")
+    String::from(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/tests/bitwarden_export.json"
+    )))
 }
 
 #[test]
