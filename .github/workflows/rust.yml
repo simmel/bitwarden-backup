@@ -99,7 +99,7 @@ jobs:
           args: --verbose
 
       - uses: actions-rs/cargo@v1
-        name: Integration test
+        name: Build release
         with:
           command: build
           args: --release
