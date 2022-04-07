@@ -7,9 +7,8 @@ use log::{debug, info, LevelFilter};
 #[cfg(unix)]
 use nix::sys::stat;
 use std::fs;
-#[allow(unused_imports)]
-#[cfg(unix)]
 use std::path::Path;
+use std::path::PathBuf;
 use valico::json_schema;
 use zeroize::Zeroize;
 
@@ -25,7 +24,7 @@ struct BitwardenBackup {
 
     /// file or directory where you save the unencrypted Bitwarden backup [REQUIRED]
     #[argh(option, short = 'p')]
-    path: Option<String>,
+    path: Option<PathBuf>,
 
     /// whether or not to use file system watching on path
     #[argh(switch)]
@@ -63,15 +62,15 @@ fn validate_backup(backup_json: &str) -> bool {
 }
 
 #[cfg(unix)]
-fn get_backup(path: &str) -> String {
+fn get_backup(path: &Path) -> String {
     // Ignore if it doesn't exist
-    let _ = fs::remove_file(&path);
-    nix::unistd::mkfifo(Path::new(&path), stat::Mode::S_IRWXU).unwrap();
-    fs::read_to_string(&path).unwrap()
+    let _ = fs::remove_file(path);
+    nix::unistd::mkfifo(path, stat::Mode::S_IRWXU).unwrap();
+    fs::read_to_string(path).unwrap()
 }
 
 #[cfg(windows)]
-fn get_backup(_path: &str) -> String {
+fn get_backup(_path: &Path) -> String {
     String::from(include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/bitwarden_export.json"
