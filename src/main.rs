@@ -70,7 +70,18 @@ fn get_backup(path: &Path) -> String {
 }
 
 #[cfg(windows)]
-fn get_backup(_path: &Path) -> String {
+fn get_backup(path: &Path) -> String {
+    // If path exists and is a dir
+    if path.exists() {
+        (!path.is_dir())
+            .then(|| path)
+            .unwrap_or_else(|| panic!("{:?} is a directory, not a file", path));
+    } else {
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        // FIXME: Fix permissions here windows_permissions looks like it's it but I can't
+        //        understand how to use it
+        let _file = fs::File::create(path).unwrap();
+    }
     String::from(include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/bitwarden_export.json"
