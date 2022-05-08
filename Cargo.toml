@@ -19,6 +19,9 @@ zeroize = "^1.5"
 [target.'cfg(unix)'.dependencies]
 nix = "0.23.1"
 
+[target.'cfg(windows)'.dependencies]
+notify = "^4.0"
+
 [profile.release]
 opt-level = "s"
 lto = "fat"

@@ -1,4 +1,6 @@
 #![deny(warnings)]
+#[cfg(windows)]
+extern crate notify;
 extern crate serde_json;
 extern crate valico;
 use argh::FromArgs;
@@ -6,9 +8,15 @@ use log::{debug, info, LevelFilter};
 #[allow(unused_imports)]
 #[cfg(unix)]
 use nix::sys::stat;
+#[cfg(windows)]
+use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
+#[cfg(windows)]
+use std::sync::mpsc::channel;
+#[cfg(windows)]
+use std::time::Duration;
 use valico::json_schema;
 use zeroize::Zeroize;
 
@@ -25,10 +33,6 @@ struct BitwardenBackup {
     /// file or directory where you save the unencrypted Bitwarden backup [REQUIRED]
     #[argh(option, short = 'p')]
     path: Option<PathBuf>,
-
-    /// whether or not to use file system watching on path
-    #[argh(switch)]
-    fswatch: bool,
 
     /// check version
     #[argh(switch)]
@@ -82,10 +86,16 @@ fn get_backup(path: &Path) -> String {
         //        understand how to use it
         let _file = fs::File::create(path).unwrap();
     }
-    String::from(include_str!(concat!(
-        env!("CARGO_MANIFEST_DIR"),
-        "/tests/bitwarden_export.json"
-    )))
+    let (tx, rx) = channel();
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2)).unwrap();
+    watcher.watch(path, RecursiveMode::NonRecursive).unwrap();
+    loop {
+        match rx.recv() {
+            Ok(DebouncedEvent::Write(path)) => return fs::read_to_string(path).unwrap(),
+            Ok(event) => debug!("{:?}", event),
+            Err(e) => panic!("watch error: {:?}", e),
+        }
+    }
 }
 
 #[test]
@@ -140,8 +150,7 @@ fn main() {
         .init();
 
     let path = args.path.expect("Required options not provided: --path");
-    info!("Path: {:?}", path);
-    info!("fswatch: {:?}", args.fswatch);
+    info!("Save Bitwarden backup to this file: {:?}", path);
 
     let mut bitwarden_backup = get_backup(&path);
 
