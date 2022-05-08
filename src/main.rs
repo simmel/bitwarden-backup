@@ -160,6 +160,7 @@ fn main() {
         bitwarden_backup.zeroize();
         fs::remove_file(&path).unwrap();
     } else {
+        bitwarden_backup.zeroize();
         fs::remove_file(&path).unwrap();
         panic!("Could not validate backup");
     }
