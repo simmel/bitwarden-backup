@@ -11,6 +11,8 @@ use nix::sys::stat;
 #[cfg(windows)]
 use notify::{DebouncedEvent, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fs;
+#[cfg(windows)]
+use std::io::prelude::*;
 use std::path::Path;
 use std::path::PathBuf;
 #[cfg(windows)]
@@ -89,13 +91,22 @@ fn get_backup(path: &Path) -> String {
     let (tx, rx) = channel();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2)).unwrap();
     watcher.watch(path, RecursiveMode::NonRecursive).unwrap();
+    let bitwarden_backup;
     loop {
         match rx.recv() {
-            Ok(DebouncedEvent::Write(path)) => return fs::read_to_string(path).unwrap(),
+            Ok(DebouncedEvent::Write(path)) => {
+                bitwarden_backup = fs::read_to_string(path).unwrap();
+                break;
+            }
             Ok(event) => debug!("{:?}", event),
             Err(e) => panic!("watch error: {:?}", e),
-        }
+        };
     }
+    let zeroes = vec![0; fs::metadata(&path).unwrap().len().try_into().unwrap()];
+    let mut buffer = fs::File::create(&path).unwrap();
+    buffer.write_all(&zeroes).unwrap();
+    buffer.flush().unwrap();
+    bitwarden_backup
 }
 
 #[test]
