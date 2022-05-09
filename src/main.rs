@@ -154,14 +154,17 @@ fn main() {
 
     let mut bitwarden_backup = get_backup(&path);
 
-    if validate_backup(&bitwarden_backup) {
+    let backup_valid = validate_backup(&bitwarden_backup);
+
+    if backup_valid {
         info!("Backup is valid!");
         print!("{}", &bitwarden_backup);
-        bitwarden_backup.zeroize();
-        fs::remove_file(&path).unwrap();
-    } else {
-        bitwarden_backup.zeroize();
-        fs::remove_file(&path).unwrap();
+    }
+
+    bitwarden_backup.zeroize();
+    fs::remove_file(&path).unwrap();
+
+    if !backup_valid {
         panic!("Could not validate backup");
     }
 }
