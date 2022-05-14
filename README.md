@@ -25,9 +25,9 @@ Nothing is secure.
 
 But we can at least try our best:
 * Use named pipe so the unencrypted passwords never hit disk and only touch
-  memory.
+  memory (only on UNIX-like).
 * If we need to hit disk overwrite the file (yeah, we know it probably won't
-  help with SSD/NVMEs)
+  help with SSD/NVMEs) (only on Windows)
 * Overwrite memory used after we're done with it
 * Use a safe(r) programming language (Rust Evangelism Strikeforce assemble!)
 * We know gpg-agent stores the passwords in memory for a while but that's not
