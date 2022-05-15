@@ -89,7 +89,7 @@ fn get_backup(path: &Path) -> String {
         let _file = fs::File::create(path).unwrap();
     }
     let (tx, rx) = channel();
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_secs(2)).unwrap();
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(20)).unwrap();
     watcher.watch(path, RecursiveMode::NonRecursive).unwrap();
     let bitwarden_backup;
     loop {
