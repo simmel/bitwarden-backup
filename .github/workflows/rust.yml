@@ -105,7 +105,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
           $ErrorActionPreference = "stop"
-          target/release/bitwarden-backup -v -v --path $RUNNER_TEMP/gurken 2>&1 & sleep 0.5 && cat tests/bitwarden_export.json > $RUNNER_TEMP/gurken && Receive-Job -id 1 -Wait
+          Start-Job { target/release/bitwarden-backup -v -v --path $RUNNER_TEMP/gurken 2>&1; $a=$?; if (!$a) { throw $a } }; & sleep 0.5 && cat tests/bitwarden_export.json > $RUNNER_TEMP/gurken && Receive-Job -id 1 -Wait
 
       - name: Integration test UNIX-like
         if: "!startsWith(matrix.os, 'windows')"
