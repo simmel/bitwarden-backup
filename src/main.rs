@@ -71,34 +71,35 @@ fn validate_backup(backup_json: &str) -> bool {
 }
 
 #[cfg(unix)]
-fn get_backup(path: &Path) -> String {
+fn get_backup(path: &Path) -> (String, PathBuf) {
     // Ignore if it doesn't exist
     let _ = fs::remove_file(path);
     nix::unistd::mkfifo(path, stat::Mode::S_IRWXU).unwrap();
-    fs::read_to_string(path).unwrap()
+    (fs::read_to_string(path).unwrap(), path.to_path_buf())
 }
 
 #[cfg(windows)]
-fn get_backup(path: &Path) -> String {
-    // If path exists and is a dir
+fn get_backup(path: &Path) -> (String, PathBuf) {
+    // If path exists and isn't a dir
     if path.exists() {
-        (!path.is_dir())
+        (path.is_dir())
             .then(|| path)
-            .unwrap_or_else(|| panic!("{:?} is a directory, not a file", path));
+            .unwrap_or_else(|| panic!("{:?} is not a directory", path));
     } else {
-        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::create_dir_all(path).unwrap();
         // FIXME: Fix permissions here windows_permissions looks like it's it but I can't
         //        understand how to use it
-        let _file = fs::File::create(path).unwrap();
     }
     let (tx, rx) = channel();
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(500)).unwrap();
-    watcher.watch(path, RecursiveMode::NonRecursive).unwrap();
+    watcher.watch(path, RecursiveMode::Recursive).unwrap();
     let bitwarden_backup;
+    let path: PathBuf;
     loop {
         match rx.recv() {
-            Ok(DebouncedEvent::Write(path)) => {
-                bitwarden_backup = fs::read_to_string(path).unwrap();
+            Ok(DebouncedEvent::Create(backup)) => {
+                path = backup;
+                bitwarden_backup = fs::read_to_string(&path).unwrap();
                 break;
             }
             Ok(event) => debug!("{:?}", event),
@@ -109,7 +110,7 @@ fn get_backup(path: &Path) -> String {
     let mut buffer = fs::File::create(&path).unwrap();
     buffer.write_all(&zeroes).unwrap();
     buffer.flush().unwrap();
-    bitwarden_backup
+    (bitwarden_backup, path)
 }
 
 #[test]
@@ -166,7 +167,7 @@ fn main() {
     let path = args.path.expect("Required options not provided: --path");
     info!("Save Bitwarden backup to this file: {:?}", path);
 
-    let mut bitwarden_backup = get_backup(&path);
+    let (mut bitwarden_backup, path) = get_backup(&path);
 
     let backup_valid = validate_backup(&bitwarden_backup);
 
