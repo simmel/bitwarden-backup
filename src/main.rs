@@ -61,7 +61,10 @@ fn validate_backup(backup_json: &str) -> bool {
         .expect("Couldn't compile schema");
     let backup_json_parsed =
         serde_json::from_str(backup_json).expect("Bitwarden backup is not valid JSON");
-    let valid = json_schema.validate(&backup_json_parsed).is_valid();
+    let schema_validation = json_schema.validate(&backup_json_parsed);
+    let valid = schema_validation.is_valid();
+
+    debug!("Schema validation: {:?}", schema_validation);
     debug!("Is valid: {:?}", valid);
 
     valid
