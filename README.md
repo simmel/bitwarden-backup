@@ -35,6 +35,16 @@ $ bitwarden-backup.exe --path $HOME\Downloads\bitwarden_backup\ | \
 then save the unencrypted JSON backup (.json) of your Vault into the folder
 `$HOME\Downloads\bitwarden_backup\`.
 
+### Bitwarden CLI
+```shell
+$ (sleep 1 && bw --raw export > ~/Downloads/bitwarden_export.json) & \
+bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
+  gpg -eac --passphrase-fd 3 -o bitwarden_export.json.asc \
+    3< <(pass bitwarden/backup) && \
+  scp bitwarden_export.json.asc backup-server.example.com:/backup && \
+  curl -sSf https://some-service/my-uuid/completed
+```
+
 ## Securer?
 
 Nothing is secure.
