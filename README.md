@@ -12,7 +12,7 @@ creation](src/resources/bitwarden_export_schema.json).
 ## Usage
 
 ### UNIX-like
-```shell
+```console
 $ bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
   gpg -eac --passphrase-fd 3 -o bitwarden_export.json.asc \
     3< <(pass bitwarden/backup) && \
@@ -24,7 +24,7 @@ then save the unencrypted JSON backup (.json) of your Vault into the file
 `~/Downloads/bitwarden_export.json`.
 
 ### Windows
-```shell
+```console
 $ bitwarden-backup.exe --path $HOME\Downloads\bitwarden_backup\ | \
   gpg -eac --passphrase-fd 3 -o bitwarden_export.json.asc \
     3< <(pass bitwarden/backup) && \
@@ -36,7 +36,7 @@ then save the unencrypted JSON backup (.json) of your Vault into the folder
 `$HOME\Downloads\bitwarden_backup\`.
 
 ### Bitwarden CLI
-```shell
+```console
 $ (sleep 1 && bw --raw export > ~/Downloads/bitwarden_export.json) & \
 bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
   gpg -eac --passphrase-fd 3 -o bitwarden_export.json.asc \
