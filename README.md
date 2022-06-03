@@ -1,10 +1,13 @@
 # bitwarden-backup
 
-A securer and composable tool for doing backups of Bitwarden.
+A securer and composable tool for doing and validating backups of Bitwarden.
 
 Uses named pipes (UNIX-like OSes) or as a last resort filesystem notification
 (Windows) to securely handle Bitwarded unencrypted JSON backup from the
-Bitwarden Web Vault via your webbrowser or via the Bitwarden Desktop application.
+Bitwarden Web Vault via your webbrowser or via the Bitwarden Desktop
+application. Also validates the backup before passing it to your encryption
+pipeline via a [JSON schema](https://json-schema.org/) of our [own
+creation](src/resources/bitwarden_export_schema.json).
 
 ## Usage
 
@@ -42,6 +45,7 @@ But we can at least try our best:
 * If we need to hit disk overwrite the file (yeah, we know it probably won't
   help with SSD/NVMEs) (only on Windows)
 * Overwrite memory used after we're done with it
+* Validating the backup before passing it along to the encryption pipeline.
 * Use a safe(r) programming language (Rust Evangelism Strikeforce assemble!)
 * We know gpg-agent stores the passwords in memory for a while but that's not
   our problem ; P
