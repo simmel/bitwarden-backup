@@ -45,6 +45,15 @@ bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
   curl -sSf https://some-service/my-uuid/completed
 ```
 
+### [openssl enc(1)](https://www.openssl.org/docs/man3.0/man1/openssl-enc.html)
+```console
+$ bitwarden-backup --path ~/Downloads/bitwarden_export.json | \
+  openssl enc -aes-256-ctr -pbkdf2 -pass fd:3 -out bitwarden_export.json.aes256 \
+    3< <(pass bitwarden/backup) && \
+  scp bitwarden_export.json.aes256 backup-server.example.com:/backup && \
+  curl -sSf https://some-service/my-uuid/completed
+```
+
 ## Securer?
 
 Nothing is secure.
