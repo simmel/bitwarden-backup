@@ -183,7 +183,10 @@ fn main() -> Result<()> {
 
     let (mut bitwarden_backup, path) = get_backup(&path);
 
-    validate_backup(&bitwarden_backup)?;
+    validate_backup(&bitwarden_backup).map_err(|err| {
+        bitwarden_backup.zeroize();
+        err
+    })?;
 
     info!("Backup is valid!");
     print!("{}", &bitwarden_backup);
