@@ -69,7 +69,7 @@ fn validate_backup(backup_json: &str) -> Result<()> {
 
     schema_validation
         .is_valid()
-        .then(|| ())
+        .then_some(())
         .ok_or(anyhow!("Could not validate backup"))
 }
 
