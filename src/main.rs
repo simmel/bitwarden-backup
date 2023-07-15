@@ -67,9 +67,10 @@ fn validate_backup(backup_json: &str) -> Result<()> {
     debug!("Schema validation: {:?}", schema_validation);
     debug!("Is valid: {:?}", schema_validation.is_valid());
 
+    #[allow(clippy::unnecessary_lazy_evaluations)]
     schema_validation
         .is_valid()
-        .then_some(())
+        .then(|| ())
         .ok_or(anyhow!("Could not validate backup"))
 }
 
