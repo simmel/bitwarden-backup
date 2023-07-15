@@ -146,6 +146,17 @@ fn test_bitwarden_example() {
     assert!(valid.is_ok());
 }
 
+#[test]
+fn test_not_valid_json_schema() {
+    let json = String::from(
+        r#"
+        {"my-secret-key": "my-secret-key"}
+"#,
+    );
+    let valid = validate_backup(&json);
+    assert!(valid.is_err());
+}
+
 fn main() -> Result<()> {
     let args: BitwardenBackup = argh::from_env();
 
