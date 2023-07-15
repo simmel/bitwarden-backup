@@ -3,6 +3,7 @@
 extern crate notify;
 extern crate serde_json;
 extern crate valico;
+use anyhow::{anyhow, Result};
 use argh::FromArgs;
 use log::{debug, info, LevelFilter};
 #[allow(unused_imports)]
@@ -143,12 +144,12 @@ fn test_bitwarden_example() {
     assert!(valid);
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args: BitwardenBackup = argh::from_env();
 
     if args.version {
         println!(env!("CARGO_PKG_VERSION"));
-        return;
+        return Ok(());
     }
 
     let mut loglevel: LevelFilter = LevelFilter::Error;
@@ -177,9 +178,11 @@ fn main() {
     }
 
     bitwarden_backup.zeroize();
-    fs::remove_file(&path).unwrap();
+    fs::remove_file(&path)?;
 
     if !backup_valid {
-        panic!("Could not validate backup");
+        return Err(anyhow!("Could not validate backup"));
+    } else {
+        Ok(())
     }
 }
