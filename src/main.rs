@@ -189,7 +189,7 @@ fn main() -> Result<()> {
     print!("{}", &bitwarden_backup);
 
     bitwarden_backup.zeroize();
-    fs::remove_file(&path)?;
+    fs::remove_file(path)?;
 
     Ok(())
 }
