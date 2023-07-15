@@ -43,7 +43,7 @@ struct BitwardenBackup {
 }
 
 // FIXME: Return a Result instead and use map_err to add to the errors
-fn validate_backup(backup_json: &str) -> bool {
+fn validate_backup(backup_json: &str) -> Result<()> {
     let schema = concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/src/resources/bitwarden_export_schema.json"
@@ -63,12 +63,14 @@ fn validate_backup(backup_json: &str) -> bool {
     let backup_json_parsed =
         serde_json::from_str(backup_json).expect("Bitwarden backup is not valid JSON");
     let schema_validation = json_schema.validate(&backup_json_parsed);
-    let valid = schema_validation.is_valid();
 
     debug!("Schema validation: {:?}", schema_validation);
-    debug!("Is valid: {:?}", valid);
+    debug!("Is valid: {:?}", schema_validation.is_valid());
 
-    valid
+    schema_validation
+        .is_valid()
+        .then(|| ())
+        .ok_or(anyhow!("Could not validate backup"))
 }
 
 #[cfg(unix)]
@@ -129,7 +131,7 @@ fn test_bare_minimum() {
 "#,
     );
     let valid = validate_backup(&json);
-    assert!(valid);
+    assert!(valid.is_ok());
 }
 
 #[test]
@@ -141,7 +143,7 @@ fn test_bitwarden_example() {
     .unwrap();
 
     let valid = validate_backup(&json);
-    assert!(valid);
+    assert!(valid.is_ok());
 }
 
 fn main() -> Result<()> {
@@ -170,19 +172,13 @@ fn main() -> Result<()> {
 
     let (mut bitwarden_backup, path) = get_backup(&path);
 
-    let backup_valid = validate_backup(&bitwarden_backup);
+    validate_backup(&bitwarden_backup)?;
 
-    if backup_valid {
-        info!("Backup is valid!");
-        print!("{}", &bitwarden_backup);
-    }
+    info!("Backup is valid!");
+    print!("{}", &bitwarden_backup);
 
     bitwarden_backup.zeroize();
     fs::remove_file(&path)?;
 
-    if !backup_valid {
-        return Err(anyhow!("Could not validate backup"));
-    } else {
-        Ok(())
-    }
+    Ok(())
 }
