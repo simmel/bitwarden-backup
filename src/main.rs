@@ -76,20 +76,20 @@ fn validate_backup(backup_json: &str) -> Result<()> {
 }
 
 #[cfg(unix)]
-fn get_backup(path: &Path) -> (String, PathBuf) {
+fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
     // Ignore if it doesn't exist
     let _ = fs::remove_file(path);
-    nix::unistd::mkfifo(path, stat::Mode::S_IRWXU).unwrap();
-    (fs::read_to_string(path).unwrap(), path.to_path_buf())
+    nix::unistd::mkfifo(path, stat::Mode::S_IRWXU)?;
+    Ok((fs::read_to_string(path).unwrap(), path.to_path_buf()))
 }
 
 #[cfg(windows)]
-fn get_backup(path: &Path) -> (String, PathBuf) {
+fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
     // If path exists and isn't a dir
     if path.exists() {
         (path.is_dir())
             .then(|| path)
-            .unwrap_or_else(|| panic!("{:?} is not a directory", path));
+            .ok_or(anyhow!("{:?} is not a directory", path))?;
     } else {
         fs::create_dir_all(path).unwrap();
         // FIXME: Fix permissions here windows_permissions looks like it's it but I can't
@@ -115,7 +115,7 @@ fn get_backup(path: &Path) -> (String, PathBuf) {
     let mut buffer = fs::File::create(&path).unwrap();
     buffer.write_all(&zeroes).unwrap();
     buffer.flush().unwrap();
-    (bitwarden_backup, path)
+    Ok((bitwarden_backup, path))
 }
 
 #[test]
@@ -183,7 +183,7 @@ fn main() -> Result<()> {
         .ok_or(anyhow!("Required options not provided: --path"))?;
     info!("Save Bitwarden backup to this file: {:?}", path);
 
-    let (mut bitwarden_backup, path) = get_backup(&path);
+    let (mut bitwarden_backup, path) = get_backup(&path)?;
 
     validate_backup(&bitwarden_backup).map_err(|err| {
         bitwarden_backup.zeroize();
