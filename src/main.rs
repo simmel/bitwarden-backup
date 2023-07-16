@@ -59,7 +59,7 @@ fn validate_backup(backup_json: &str) -> Result<()> {
     let mut scope = json_schema::Scope::new();
     let json_schema = scope
         .compile_and_return(json_schema, true)
-        .expect("Couldn't compile schema");
+        .map_err(|e| anyhow!("Couldn't compile schema: {:?}", e))?;
     let backup_json_parsed = serde_json::from_str(backup_json)
         .map_err(|e| anyhow!("Bitwarden backup is not valid JSON: {:?}", e))?;
     let schema_validation = json_schema.validate(&backup_json_parsed);
