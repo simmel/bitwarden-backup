@@ -119,7 +119,7 @@ fn get_backup(path: &Path) -> (String, PathBuf) {
 }
 
 #[test]
-fn test_bare_minimum() {
+fn test_bare_minimum() -> Result<()> {
     let json = String::from(
         r#"
 {
@@ -132,20 +132,18 @@ fn test_bare_minimum() {
 }
 "#,
     );
-    let valid = validate_backup(&json);
-    assert!(valid.is_ok());
+    validate_backup(&json)
 }
 
 #[test]
-fn test_bitwarden_example() {
+fn test_bitwarden_example() -> Result<()> {
     let json = fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/bitwarden_export.json"
     ))
     .unwrap();
 
-    let valid = validate_backup(&json);
-    assert!(valid.is_ok());
+    validate_backup(&json)
 }
 
 #[test]
