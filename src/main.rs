@@ -178,7 +178,9 @@ fn main() -> Result<()> {
         .filter(None, loglevel)
         .init();
 
-    let path = args.path.expect("Required options not provided: --path");
+    let path = args
+        .path
+        .ok_or(anyhow!("Required options not provided: --path"))?;
     info!("Save Bitwarden backup to this file: {:?}", path);
 
     let (mut bitwarden_backup, path) = get_backup(&path);
