@@ -86,6 +86,7 @@ fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
 #[cfg(windows)]
 fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
     // If path exists and isn't a dir
+    #[allow(clippy::or_fun_call)]
     if path.exists() {
         (path.is_dir())
             .then(|| path)
@@ -178,6 +179,7 @@ fn main() -> Result<()> {
         .filter(None, loglevel)
         .init();
 
+    #[allow(clippy::or_fun_call)]
     let path = args
         .path
         .ok_or(anyhow!("Required options not provided: --path"))?;
