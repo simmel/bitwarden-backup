@@ -109,7 +109,7 @@ fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
                 break;
             }
             Ok(event) => debug!("{:?}", event),
-            Err(e) => panic!("watch error: {:?}", e),
+            Err(e) => anyhow::bail!("watch error: {:?}", e),
         };
     }
     let zeroes = vec![0; fs::metadata(&path).unwrap().len().try_into().unwrap()];
