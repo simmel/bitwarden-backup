@@ -80,7 +80,7 @@ fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
     // Ignore if it doesn't exist
     let _ = fs::remove_file(path);
     nix::unistd::mkfifo(path, stat::Mode::S_IRWXU)?;
-    Ok((fs::read_to_string(path).unwrap(), path.to_path_buf()))
+    Ok((fs::read_to_string(path)?, path.to_path_buf()))
 }
 
 #[cfg(windows)]
@@ -92,30 +92,30 @@ fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
             .then(|| path)
             .ok_or(anyhow!("{:?} is not a directory", path))?;
     } else {
-        fs::create_dir_all(path).unwrap();
+        fs::create_dir_all(path)?;
         // FIXME: Fix permissions here windows_permissions looks like it's it but I can't
         //        understand how to use it
     }
     let (tx, rx) = channel();
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(500)).unwrap();
-    watcher.watch(path, RecursiveMode::Recursive).unwrap();
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(500))?;
+    watcher.watch(path, RecursiveMode::Recursive)?;
     let bitwarden_backup;
     let path: PathBuf;
     loop {
         match rx.recv() {
             Ok(DebouncedEvent::Create(backup)) => {
                 path = backup;
-                bitwarden_backup = fs::read_to_string(&path).unwrap();
+                bitwarden_backup = fs::read_to_string(&path)?;
                 break;
             }
             Ok(event) => debug!("{:?}", event),
             Err(e) => anyhow::bail!("watch error: {:?}", e),
         };
     }
-    let zeroes = vec![0; fs::metadata(&path).unwrap().len().try_into().unwrap()];
-    let mut buffer = fs::File::create(&path).unwrap();
-    buffer.write_all(&zeroes).unwrap();
-    buffer.flush().unwrap();
+    let zeroes = vec![0; fs::metadata(&path)?.len().try_into()?];
+    let mut buffer = fs::File::create(&path)?;
+    buffer.write_all(&zeroes)?;
+    buffer.flush()?;
     Ok((bitwarden_backup, path))
 }
 
@@ -141,8 +141,7 @@ fn test_bitwarden_example() -> Result<()> {
     let json = fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
         "/tests/bitwarden_export.json"
-    ))
-    .unwrap();
+    ))?;
 
     validate_backup(&json)
 }
