@@ -1,4 +1,7 @@
-test: test_valid_backup test_invalid_backup
+test: target/debug/bitwarden-backup test_valid_backup test_invalid_backup
+
+target/debug/bitwarden-backup:
+	cargo build
 
 test_valid_backup:
 	@echo TEST $@
