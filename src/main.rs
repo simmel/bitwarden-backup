@@ -99,13 +99,22 @@ fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
     let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(500))?;
     watcher.watch(path, RecursiveMode::Recursive)?;
     let bitwarden_backup;
-    let path: PathBuf;
+    let mut path: PathBuf;
     loop {
         match rx.recv() {
             Ok(DebouncedEvent::Create(backup)) => {
-                path = backup;
-                bitwarden_backup = fs::read_to_string(&path)?;
-                break;
+                path = backup.clone();
+                debug!("{:?}", DebouncedEvent::Create(backup));
+                if path
+                    .file_name()
+                    .unwrap()
+                    .to_str()
+                    .unwrap()
+                    .starts_with("bitwarden_export")
+                {
+                    bitwarden_backup = fs::read_to_string(&path)?;
+                    break;
+                }
             }
             Ok(event) => debug!("{:?}", event),
             Err(e) => anyhow::bail!("watch error: {:?}", e),
