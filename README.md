@@ -25,7 +25,7 @@ then save the unencrypted JSON backup (.json) of your Vault into the file
 
 ### Windows
 ```console
-$ bitwarden-backup.exe --path $HOME\Downloads\bitwarden_backup\ | \
+$ bitwarden-backup.exe --path $HOME\Downloads\ | \
   gpg -eac --passphrase-fd 3 -o bitwarden_export.json.asc \
     3< <(pass bitwarden/backup) && \
   scp bitwarden_export.json.asc backup-server.example.com:/backup && \
@@ -33,7 +33,8 @@ $ bitwarden-backup.exe --path $HOME\Downloads\bitwarden_backup\ | \
 ```
 
 then save the unencrypted JSON backup (.json) of your Vault into the folder
-`$HOME\Downloads\bitwarden_backup\`.
+`$HOME\Downloads\`. We'll only act on files that starts with `bitwarden_export`
+which is what Bitwarden by default names it's files.
 
 ### Bitwarden CLI
 ```console
