@@ -86,6 +86,7 @@ fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
 fn get_backup(path: &Path) -> Result<(String, PathBuf)> {
     // If path exists and isn't a dir
     #[allow(clippy::or_fun_call)]
+    #[allow(clippy::unnecessary_lazy_evaluations)]
     if path.exists() {
         (path.is_dir())
             .then(|| path)
