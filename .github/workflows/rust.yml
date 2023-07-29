@@ -106,7 +106,7 @@ jobs:
         run: |
           $ErrorActionPreference = "stop"
           $one=Start-Job { target/release/bitwarden-backup -v -v --path $env:RUNNER_TEMP 2>&1; $a=$?; if (!$a) { throw $a } }; & sleep 0.5 && cp tests/bitwarden_export.json $env:RUNNER_TEMP && Receive-Job -Job $one -Wait
-          $two=Start-Job { target/release/bitwarden-backup -v -v --path $env:RUNNER_TEMP 2>&1; $a=$?; if (!$a) { throw $a } }; & sleep 0.5 && echo '{"my-secret-key": "my-secret-key"}' > $env:RUNNER_TEMP/meow.json && cp tests/bitwarden_export.json $env:RUNNER_TEMP && sleep 1 && Get-Item -Path $env:RUNNER_TEMP/meow.json && Get-Job && Receive-Job -Job $two -Wait
+          $two=Start-Job { target/release/bitwarden-backup -v -v --path $env:RUNNER_TEMP 2>&1; $a=$?; if (!$a) { throw $a } }; & sleep 0.5 && echo '{"my-secret-key": "my-secret-key"}' > $env:RUNNER_TEMP/meow.json && cp tests/bitwarden_export.json $env:RUNNER_TEMP && sleep 1 && Get-Item -Path $env:RUNNER_TEMP/meow.json && Receive-Job -Job $two -Wait
 
       - name: Integration test UNIX-like
         if: "!startsWith(matrix.os, 'windows')"
